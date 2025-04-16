@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF.js Test</title>
+    <link rel="stylesheet" href="/js/pdfjs/web/pdf_viewer.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            position: relative;
+            height: 100vh;
+        }
+        #viewer {
+            /* border: 2px solid blue; */
+            min-height: 500px;
+            width: 100%;
+        }
+        .pdfViewer {
+            position: absolute;
+            overflow: auto;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+        .pdfViewer .page {
+            margin: 1px auto -8px auto;
+            border: 9px solid transparent;
+            background-clip: content-box;
+        }
+    </style>
+</head>
+<body>
+    <div id="container" class="pdfViewer">
+        <div id="viewer"></div>
+    </div>
+
+    <script type="module">
+        import * as pdfjsLib from '/js/pdfjs/build/pdf.mjs';
+        import * as pdfjsViewer from '/js/pdfjs/web/pdf_viewer.mjs';
+
+        // The workerSrc property shall be specified.
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "/js/pdfjs/build/pdf.worker.mjs";
+
+        async function initPdfViewer() {
+            const container = document.getElementById("container");
+            const viewer = document.getElementById("viewer");
+            
+            if (!container || !viewer) {
+                console.error("Viewer element not found");
+                return;
+            }
+            
+            console.log("Initializing PDF viewer");
+            
+            const eventBus = new pdfjsViewer.EventBus();
+            
+            try {
+                // Get the file URL from the query parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const fileUrl = urlParams.get('file');
+                
+                // Use the file URL if provided, otherwise use the default PDF
+                const url = fileUrl || "/storage/test.pdf";
+                console.log("Loading PDF from URL:", url);
+                
+                const loadingTask = pdfjsLib.getDocument({
+                    url: url,
+                    cMapUrl: "/js/pdfjs/cmaps/",
+                    cMapPacked: true,
+                });
+
+                const pdfDocument = await loadingTask.promise;
+                console.log("PDF document loaded:", pdfDocument);
+                
+                // Document loaded, retrieving the page.
+                const pdfPage = await pdfDocument.getPage(1);
+                console.log("PDF page loaded:", pdfPage);
+
+                // Creating the page view with default parameters.
+                // The PDFViewer constructor expects specific parameters
+                const pdfPageView = new pdfjsViewer.PDFViewer({
+                    container: container,
+                    viewer: viewer,
+                    eventBus: eventBus,
+                    textLayerMode: 2,
+                    renderInteractiveForms: true,
+                    linkService: new pdfjsViewer.PDFLinkService({
+                        eventBus: eventBus,
+                    }),
+                    findController: new pdfjsViewer.PDFFindController({
+                        eventBus: eventBus,
+                        linkService: new pdfjsViewer.PDFLinkService({
+                            eventBus: eventBus,
+                        }),
+                    }),
+                });
+                
+                // Associate the actual page with the view, and draw it.
+                pdfPageView.setDocument(pdfDocument);
+                
+                // Force a redraw
+                setTimeout(() => {
+                    console.log("Forcing redraw of PDF viewer");
+                    pdfPageView.update();
+                }, 500);
+                
+                return {
+                    pdfDocument,
+                    pdfPage,
+                    pdfPageView,
+                    eventBus
+                };
+            } catch (error) {
+                console.error("Error in PDF viewer initialization:", error);
+                viewer.innerHTML = `<div class="p-4 text-red-500">Error loading PDF: ${error.message}</div>`;
+                throw error;
+            }
+        }
+
+        // Initialize the viewer when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing PDF viewer');
+            initPdfViewer().catch(error => {
+                console.error('Error initializing PDF viewer:', error);
+            });
+        });
+    </script>
+</body>
+</html> 
