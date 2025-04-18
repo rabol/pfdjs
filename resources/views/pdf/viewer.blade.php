@@ -38,8 +38,6 @@
 
         <script type="module">
             import * as pdfjsLib from '/js/pdfjs/build/pdf.mjs';
-
-            // Set worker path
             pdfjsLib.GlobalWorkerOptions.workerSrc = '/js/pdfjs/build/pdf.worker.mjs';
 
             const container = document.getElementById('pdf-container');
@@ -49,19 +47,18 @@
                     type,
                     url
                 } = event.data;
+                console.log("iframe received message", event.data);
 
-                // Load the PDF
                 if (type === 'load-pdf' && url) {
                     try {
-                        container.innerHTML = ''; // Clear previous content
-
+                        container.innerHTML = '';
                         const loadingTask = pdfjsLib.getDocument(url);
                         const pdf = await loadingTask.promise;
-                        const page = await pdf.getPage(1); // Load first page
-
+                        const page = await pdf.getPage(1);
                         const viewport = page.getViewport({
                             scale: 1.5
                         });
+
                         const canvas = document.createElement("canvas");
                         canvas.width = viewport.width;
                         canvas.height = viewport.height;
@@ -77,7 +74,6 @@
                     }
                 }
 
-                // Add image overlay
                 if (type === 'add-image' && url) {
                     const img = new Image();
                     img.src = url;
@@ -85,9 +81,37 @@
                     img.style.top = '100px';
                     img.style.left = '100px';
                     img.style.width = '150px';
+                    img.draggable = false;
                     container.appendChild(img);
+
+                    makeDraggable(img);
                 }
             }, false);
+
+            function makeDraggable(el) {
+                let offsetX = 0;
+                let offsetY = 0;
+                let isDragging = false;
+
+                el.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    offsetX = e.clientX - el.offsetLeft;
+                    offsetY = e.clientY - el.offsetTop;
+                    el.style.zIndex = 1000;
+                    e.preventDefault();
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    el.style.left = (e.clientX - offsetX) + 'px';
+                    el.style.top = (e.clientY - offsetY) + 'px';
+                });
+
+                document.addEventListener('mouseup', () => {
+                    isDragging = false;
+                    el.style.zIndex = 10;
+                });
+            }
         </script>
     </body>
 
