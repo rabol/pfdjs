@@ -1,4 +1,4 @@
-<div class="flex h-full flex-1 flex-col">
+<div class="flex h-full w-full flex-col">
     <!-- Upload Buttons -->
     <div class="flex flex-col items-center justify-center gap-4 p-2 sm:flex-row">
         <!-- Upload & Display PDF -->
@@ -26,15 +26,17 @@
         </div>
     </div>
 
-    <!-- Viewer + Spinner -->
-    <div class="relative h-full min-h-0 flex-1">
-        <!-- Spinner -->
-        <div wire:loading.delay.long wire:target="pdfFile" class="absolute inset-0 z-50 flex items-center justify-center bg-white bg-opacity-80">
-            <div class="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-        </div>
+    <!-- PDF Viewer + Spinner -->
+    <div class="relative min-h-0 flex-1">
+        <div class="relative h-full">
+            <!-- Spinner -->
+            <div wire:loading.delay wire:target="pdfFile" class="absolute inset-0 z-50 flex items-center justify-center bg-white bg-opacity-80">
+                <div class="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+            </div>
 
-        <!-- PDF Viewer -->
-        <iframe id="pdfIframe" src="{{ route('pdf.viewer', [], true) }}" class="h-full w-full rounded border border-gray-300" loading="lazy"></iframe>
+            <!-- Viewer -->
+            <iframe id="pdfIframe" src="{{ route('pdf.viewer', [], true) }}" class="h-full w-full rounded border border-gray-300" loading="lazy"></iframe>
+        </div>
     </div>
 
     <script>

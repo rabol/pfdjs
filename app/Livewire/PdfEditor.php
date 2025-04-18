@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -20,28 +21,19 @@ class PdfEditor extends Component
 
     public function updatedPdfFile()
     {
-        $this->uploadPdf();
-    }
-
-    public function updatedImageFile()
-    {
-        $this->uploadImage();
-    }
-
-    public function uploadPdf()
-    {
+        ds(__FUNCTION__);
         $this->validate([
             'pdfFile' => 'required|file|mimes:pdf|max:10240',
         ]);
 
         $path = $this->pdfFile->store('uploads', 'public');
         $this->pdfUrl = Storage::url($path);
-
+        ds('dispatch pdf-uploaded');
         $this->dispatch('pdf-uploaded', ['url' => $this->pdfUrl]);
         $this->reset('pdfFile');
     }
 
-    public function uploadImage()
+    public function updatedImageFile()
     {
         $this->validate([
             'imageFile' => 'required|image|max:2048',
@@ -56,6 +48,13 @@ class PdfEditor extends Component
 
     public function render()
     {
-        return view('livewire.pdf-editor');
+        return view('livewire.pdf-editor.index');
+    }
+
+    public function placeholder(array $params = []): View
+    {
+        ds(__FUNCTION__);
+
+        return view('livewire.pdf-editor.loading', $params);
     }
 }

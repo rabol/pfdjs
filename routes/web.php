@@ -13,7 +13,7 @@ Route::get('/pdfviewer', function () {
 });
 
 Route::get('/pdf/viewer', function () {
-    return view('pdf.viewer', [
+    return view('pdf-viewer.index', [
         'pdf' => request('pdf'),
     ]);
 })->name('pdf.viewer');

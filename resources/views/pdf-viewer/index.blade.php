@@ -9,7 +9,6 @@
             html,
             body {
                 margin: 0;
-                padding: 0;
                 height: 100%;
                 overflow: hidden;
             }
@@ -35,6 +34,8 @@
                 position: absolute;
                 z-index: 10;
                 cursor: move;
+                touch-action: none;
+                transform-origin: center center;
             }
         </style>
     </head>
@@ -53,7 +54,6 @@
                     type,
                     url
                 } = event.data;
-                console.log("iframe received message", event.data);
 
                 if (type === 'load-pdf' && url) {
                     try {
@@ -92,22 +92,23 @@
                     img.style.left = '100px';
                     img.style.width = '150px';
                     img.draggable = false;
+                    img.dataset.scale = 1;
                     container.appendChild(img);
-                    makeDraggable(img);
+                    makeDraggableAndScalable(img);
                 }
-            }, false);
+            });
 
-            function makeDraggable(el) {
-                let offsetX = 0;
-                let offsetY = 0;
+            function makeDraggableAndScalable(el) {
+                let offsetX = 0,
+                    offsetY = 0;
                 let isDragging = false;
+                let initialDistance = 0;
+                let scale = 1;
 
-                // Mouse Events
                 el.addEventListener('mousedown', (e) => {
                     isDragging = true;
                     offsetX = e.clientX - el.offsetLeft;
                     offsetY = e.clientY - el.offsetTop;
-                    el.style.zIndex = 1000;
                     e.preventDefault();
                 });
 
@@ -119,30 +120,58 @@
 
                 document.addEventListener('mouseup', () => {
                     isDragging = false;
-                    el.style.zIndex = 10;
                 });
 
-                // Touch Events
                 el.addEventListener('touchstart', (e) => {
-                    isDragging = true;
-                    const touch = e.touches[0];
-                    offsetX = touch.clientX - el.offsetLeft;
-                    offsetY = touch.clientY - el.offsetTop;
-                    el.style.zIndex = 1000;
+                    if (e.touches.length === 1) {
+                        isDragging = true;
+                        const touch = e.touches[0];
+                        offsetX = touch.clientX - el.offsetLeft;
+                        offsetY = touch.clientY - el.offsetTop;
+                    } else if (e.touches.length === 2) {
+                        isDragging = false;
+                        initialDistance = getTouchDistance(e.touches);
+                    }
+                });
+
+                el.addEventListener('touchmove', (e) => {
+                    if (e.touches.length === 1 && isDragging) {
+                        const touch = e.touches[0];
+                        el.style.left = (touch.clientX - offsetX) + 'px';
+                        el.style.top = (touch.clientY - offsetY) + 'px';
+                    } else if (e.touches.length === 2) {
+                        const newDistance = getTouchDistance(e.touches);
+                        const scaleFactor = newDistance / initialDistance;
+                        const newScale = Math.max(0.3, Math.min(scale * scaleFactor, 5));
+                        el.style.transform = `scale(${newScale})`;
+                        el.dataset.scale = newScale;
+                    }
+
                     e.preventDefault();
                 });
 
-                document.addEventListener('touchmove', (e) => {
-                    if (!isDragging) return;
-                    const touch = e.touches[0];
-                    el.style.left = (touch.clientX - offsetX) + 'px';
-                    el.style.top = (touch.clientY - offsetY) + 'px';
+                el.addEventListener('touchend', (e) => {
+                    if (e.touches.length === 0) {
+                        scale = parseFloat(el.dataset.scale || '1');
+                        isDragging = false;
+                    }
                 });
 
-                document.addEventListener('touchend', () => {
-                    isDragging = false;
-                    el.style.zIndex = 10;
+                el.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const delta = Math.sign(e.deltaY);
+                    scale = parseFloat(el.dataset.scale || '1');
+                    scale -= delta * 0.1;
+                    scale = Math.min(Math.max(scale, 0.3), 5);
+                    el.style.transform = `scale(${scale})`;
+                    el.dataset.scale = scale;
                 });
+
+                function getTouchDistance(touches) {
+                    const dx = touches[0].clientX - touches[1].clientX;
+                    const dy = touches[0].clientY - touches[1].clientY;
+                    return Math.sqrt(dx * dx + dy * dy);
+                }
             }
         </script>
     </body>
