@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -9,3 +11,13 @@ Route::get('/', function () {
 Route::get('/pdfviewer', function () {
     return view('pdfviewer');
 });
+
+Route::get('/pdf/viewer', function () {
+    return view('pdf.viewer', [
+        'pdf' => request('pdf'),
+    ]);
+})->name('pdf.viewer');
+
+Route::get('/pdf', function () {
+    return view('pdf');
+})->name('pdf');
