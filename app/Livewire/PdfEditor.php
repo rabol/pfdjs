@@ -18,17 +18,27 @@ class PdfEditor extends Component
 
     public $pdfUrl;
 
+    public function updatedPdfFile()
+    {
+        $this->uploadPdf();
+    }
+
+    public function updatedImageFile()
+    {
+        $this->uploadImage();
+    }
+
     public function uploadPdf()
     {
-        ds('here');
         $this->validate([
             'pdfFile' => 'required|file|mimes:pdf|max:10240',
         ]);
-        ds('after validate');
+
         $path = $this->pdfFile->store('uploads', 'public');
         $this->pdfUrl = Storage::url($path);
+
         $this->dispatch('pdf-uploaded', ['url' => $this->pdfUrl]);
-        // $this->reset('pdfFile');
+        $this->reset('pdfFile');
     }
 
     public function uploadImage()
@@ -41,7 +51,6 @@ class PdfEditor extends Component
         $imageUrl = Storage::url($path);
 
         $this->dispatch('image-uploaded', ['url' => $imageUrl]);
-
         $this->reset('imageFile');
     }
 

@@ -4,10 +4,12 @@
     <head>
         <meta charset="UTF-8">
         <title>PDF Viewer</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style>
             html,
             body {
                 margin: 0;
+                padding: 0;
                 height: 100%;
                 overflow: hidden;
             }
@@ -17,12 +19,16 @@
                 width: 100%;
                 height: 100%;
                 background: #f9fafb;
+                overflow-y: auto;
+                padding: 1rem 0;
+                box-sizing: border-box;
             }
 
             canvas {
-                position: absolute;
-                top: 0;
-                left: 0;
+                display: block;
+                margin: 0 auto 2rem auto;
+                max-width: 100%;
+                height: auto;
             }
 
             .image-overlay {
@@ -54,21 +60,25 @@
                         container.innerHTML = '';
                         const loadingTask = pdfjsLib.getDocument(url);
                         const pdf = await loadingTask.promise;
-                        const page = await pdf.getPage(1);
-                        const viewport = page.getViewport({
-                            scale: 1.5
-                        });
 
-                        const canvas = document.createElement("canvas");
-                        canvas.width = viewport.width;
-                        canvas.height = viewport.height;
-                        container.appendChild(canvas);
+                        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+                            const page = await pdf.getPage(pageNumber);
+                            const viewport = page.getViewport({
+                                scale: 1.5
+                            });
 
-                        const context = canvas.getContext('2d');
-                        await page.render({
-                            canvasContext: context,
-                            viewport
-                        }).promise;
+                            const canvas = document.createElement("canvas");
+                            canvas.width = viewport.width;
+                            canvas.height = viewport.height;
+                            canvas.style.position = 'relative';
+                            container.appendChild(canvas);
+
+                            const context = canvas.getContext('2d');
+                            await page.render({
+                                canvasContext: context,
+                                viewport
+                            }).promise;
+                        }
                     } catch (error) {
                         console.error('Error loading PDF:', error);
                     }
@@ -83,7 +93,6 @@
                     img.style.width = '150px';
                     img.draggable = false;
                     container.appendChild(img);
-
                     makeDraggable(img);
                 }
             }, false);
@@ -93,6 +102,7 @@
                 let offsetY = 0;
                 let isDragging = false;
 
+                // Mouse Events
                 el.addEventListener('mousedown', (e) => {
                     isDragging = true;
                     offsetX = e.clientX - el.offsetLeft;
@@ -108,6 +118,28 @@
                 });
 
                 document.addEventListener('mouseup', () => {
+                    isDragging = false;
+                    el.style.zIndex = 10;
+                });
+
+                // Touch Events
+                el.addEventListener('touchstart', (e) => {
+                    isDragging = true;
+                    const touch = e.touches[0];
+                    offsetX = touch.clientX - el.offsetLeft;
+                    offsetY = touch.clientY - el.offsetTop;
+                    el.style.zIndex = 1000;
+                    e.preventDefault();
+                });
+
+                document.addEventListener('touchmove', (e) => {
+                    if (!isDragging) return;
+                    const touch = e.touches[0];
+                    el.style.left = (touch.clientX - offsetX) + 'px';
+                    el.style.top = (touch.clientY - offsetY) + 'px';
+                });
+
+                document.addEventListener('touchend', () => {
                     isDragging = false;
                     el.style.zIndex = 10;
                 });

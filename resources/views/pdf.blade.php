@@ -9,15 +9,13 @@
         @livewireStyles
     </head>
 
-    <body class="flex min-h-screen flex-col items-center justify-start bg-gray-100 py-8">
-        <div class="w-full max-w-5xl space-y-6 px-4">
-            <h1 class="text-center text-3xl font-semibold text-gray-800">Welcome to PDF Viewer</h1>
 
-            <div class="rounded-xl bg-white p-6 shadow-md">
+    <body class="flex min-h-screen flex-col bg-gray-100">
+        <div class="flex flex-1 items-center justify-center">
+            <div class="mx-auto h-[90vh] w-full rounded-xl border border-gray-300 bg-white p-6 px-4 shadow-md sm:max-w-md md:max-w-lg lg:max-w-3xl xl:max-w-5xl 2xl:max-w-7xl">
                 @livewire('pdf-editor')
             </div>
         </div>
-
         @livewireScripts
     </body>
 

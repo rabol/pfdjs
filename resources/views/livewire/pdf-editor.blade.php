@@ -1,59 +1,40 @@
-<div class="space-y-6">
-    <!-- Upload PDF -->
-    <form wire:submit.prevent="uploadPdf" class="space-y-2">
-        <div class="flex flex-col items-center gap-4 md:flex-row">
-            <label class="relative inline-flex cursor-pointer items-center rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700">
-                <span>Select PDF</span>
-                <input type="file" wire:model="pdfFile" accept="application/pdf" class="absolute inset-0 cursor-pointer opacity-0" />
+<div class="flex h-full flex-1 flex-col">
+    <!-- Upload Buttons -->
+    <div class="flex flex-col items-center justify-center gap-4 p-2 sm:flex-row">
+        <!-- Upload & Display PDF -->
+        <div class="flex flex-col items-center">
+            <label class="relative inline-flex cursor-pointer items-center rounded bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700" wire:loading.class="opacity-50 cursor-not-allowed"
+                wire:target="pdfFile">
+                <span>Upload & Display PDF</span>
+                <input type="file" wire:model="pdfFile" accept="application/pdf" class="absolute inset-0 cursor-pointer opacity-0" wire:loading.attr="disabled" wire:target="pdfFile" />
             </label>
-
-            <button type="submit" class="flex items-center gap-2 rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:opacity-50" wire:loading.attr="disabled" wire:target="uploadPdf,pdfFile">
-                <svg wire:loading wire:target="uploadPdf" class="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-                <span>Load PDF</span>
-            </button>
+            @error('pdfFile')
+                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+            @enderror
         </div>
 
-        @if ($pdfFile)
-            <p class="text-sm italic text-gray-600">📄 {{ $pdfFile->getClientOriginalName() }}</p>
-        @endif
-
-        @error('pdfFile')
-            <p class="text-sm text-red-500">{{ $message }}</p>
-        @enderror
-    </form>
-
-    <!-- Upload Image -->
-    <form wire:submit.prevent="uploadImage" class="space-y-2">
-        <div class="flex flex-col items-center gap-4 md:flex-row">
-            <label class="relative inline-flex cursor-pointer items-center rounded bg-green-600 px-6 py-2 text-white hover:bg-green-700">
-                <span>Select Image</span>
-                <input type="file" wire:model="imageFile" accept="image/*" class="absolute inset-0 cursor-pointer opacity-0" />
+        <!-- Upload & Add Image -->
+        <div class="flex flex-col items-center">
+            <label class="relative inline-flex cursor-pointer items-center rounded bg-green-600 px-4 py-2 text-sm text-white transition hover:bg-green-700" wire:loading.class="opacity-50 cursor-not-allowed"
+                wire:target="pdfFile">
+                <span>Upload & Add Image</span>
+                <input type="file" wire:model="imageFile" accept="image/*" class="absolute inset-0 cursor-pointer opacity-0" wire:loading.attr="disabled" wire:target="pdfFile" />
             </label>
+            @error('imageFile')
+                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+            @enderror
+        </div>
+    </div>
 
-            <button type="submit" class="flex items-center gap-2 rounded bg-green-600 px-6 py-2 text-white hover:bg-green-700 disabled:opacity-50" wire:loading.attr="disabled" wire:target="uploadImage,imageFile">
-                <svg wire:loading wire:target="uploadImage" class="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-                <span>Add Image</span>
-            </button>
+    <!-- Viewer + Spinner -->
+    <div class="relative h-full min-h-0 flex-1">
+        <!-- Spinner -->
+        <div wire:loading.delay.long wire:target="pdfFile" class="absolute inset-0 z-50 flex items-center justify-center bg-white bg-opacity-80">
+            <div class="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
         </div>
 
-        @if ($imageFile)
-            <p class="text-sm italic text-gray-600">🖼️ {{ $imageFile->getClientOriginalName() }}</p>
-        @endif
-
-        @error('imageFile')
-            <p class="text-sm text-red-500">{{ $message }}</p>
-        @enderror
-    </form>
-
-    <!-- Always visible iframe -->
-    <div>
-        <iframe id="pdfIframe" src="{{ route('pdf.viewer') }}" class="h-[80vh] w-full rounded border border-gray-300" loading="lazy"></iframe>
+        <!-- PDF Viewer -->
+        <iframe id="pdfIframe" src="{{ route('pdf.viewer', [], true) }}" class="h-full w-full rounded border border-gray-300" loading="lazy"></iframe>
     </div>
 
     <script>
@@ -83,7 +64,7 @@
 
             iframe.contentWindow.postMessage({
                 type: 'add-image',
-                url: url
+                url
             }, '*');
         });
     </script>
