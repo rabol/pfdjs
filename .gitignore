@@ -22,3 +22,5 @@ yarn-error.log
 /.vscode
 /.zed
 /public/js/pdfjs/
+/storage/app/private
+/storage/app/public/uploads/*
