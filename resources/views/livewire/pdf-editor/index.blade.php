@@ -1,46 +1,32 @@
-<div class="flex h-full w-full flex-col">
-    <!-- Upload Buttons -->
-    <div class="flex flex-col items-center justify-center gap-4 p-2 sm:flex-row">
-        <!-- Upload & Display PDF -->
-        <div class="flex flex-col items-center">
-            <label class="relative inline-flex cursor-pointer items-center rounded bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700" wire:loading.class="opacity-50 cursor-not-allowed"
-                wire:target="pdfFile">
-                <span>Upload & Display PDF</span>
-                <input type="file" wire:model="pdfFile" accept="application/pdf" class="absolute inset-0 cursor-pointer opacity-0" wire:loading.attr="disabled" wire:target="pdfFile" />
-            </label>
-            @error('pdfFile')
-                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-            @enderror
-        </div>
+<div class="flex h-full flex-col">
+    <div class="flex flex-col items-center justify-center gap-2 sm:flex-row sm:justify-between">
+        <label class="relative inline-flex cursor-pointer items-center rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">
+            <span>Upload & Display PDF</span>
+            <input type="file" wire:model="pdfFile" accept="application/pdf" class="absolute inset-0 cursor-pointer opacity-0" />
+        </label>
 
-        <!-- Upload & Add Image -->
-        <div class="flex flex-col items-center">
-            <label class="relative inline-flex cursor-pointer items-center rounded bg-green-600 px-4 py-2 text-sm text-white transition hover:bg-green-700" wire:loading.class="opacity-50 cursor-not-allowed"
-                wire:target="pdfFile">
-                <span>Upload & Add Image</span>
-                <input type="file" wire:model="imageFile" accept="image/*" class="absolute inset-0 cursor-pointer opacity-0" wire:loading.attr="disabled" wire:target="pdfFile" />
-            </label>
-            @error('imageFile')
-                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-            @enderror
-        </div>
+        <label class="relative inline-flex cursor-pointer items-center rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700">
+            <span>Upload & Add Image</span>
+            <input type="file" wire:model="imageFile" accept="image/*" class="absolute inset-0 cursor-pointer opacity-0" />
+        </label>
+
+        <button type="button" class="rounded bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700" onclick="document.getElementById('pdfIframe')?.contentWindow?.postMessage({ type: 'export-overlays' }, '*')">
+            Save Overlays
+        </button>
     </div>
 
-    <!-- PDF Viewer + Spinner -->
-    <div class="relative min-h-0 flex-1">
-        <div class="relative h-full">
-            <!-- Spinner -->
-            <div wire:loading.delay wire:target="pdfFile" class="absolute inset-0 z-50 flex items-center justify-center bg-white bg-opacity-80">
-                <div class="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-            </div>
-
-            <!-- Viewer -->
-            <iframe id="pdfIframe" src="{{ route('pdf.viewer', [], true) }}" class="h-full w-full rounded border border-gray-300" loading="lazy"></iframe>
-        </div>
+    <div class="mt-4 flex-1 overflow-hidden">
+        <iframe id="pdfIframe" src="{{ route('pdf.viewer', [], true) }}" class="h-full w-full rounded border border-gray-300" loading="lazy"></iframe>
     </div>
 
     <script>
+        function hideOverlayInfoBox() {
+            const box = document.getElementById('overlay-info-box');
+            if (box) box.classList.add('hidden');
+        }
+
         window.addEventListener('pdf-uploaded', event => {
+            hideOverlayInfoBox(); // hide info when uploading new PDF
             const url = event.detail[0].url;
             const iframe = document.getElementById('pdfIframe');
             if (!iframe) return;
@@ -60,6 +46,7 @@
         });
 
         window.addEventListener('image-uploaded', event => {
+            hideOverlayInfoBox(); // hide info when uploading image
             const url = event.detail[0].url;
             const iframe = document.getElementById('pdfIframe');
             if (!iframe?.contentWindow) return;
@@ -68,6 +55,23 @@
                 type: 'add-image',
                 url
             }, '*');
+        });
+
+        window.addEventListener('message', event => {
+            if (event.data.type === 'overlays-exported') {
+                const overlays = event.data.data;
+                Livewire.dispatch('save-overlays', {
+                    overlays
+                });
+
+                const box = document.getElementById('overlay-info-box');
+                const content = document.getElementById('overlay-info-content');
+
+                if (box && content) {
+                    content.innerText = JSON.stringify(overlays, null, 2);
+                    box.classList.remove('hidden');
+                }
+            }
         });
     </script>
 </div>

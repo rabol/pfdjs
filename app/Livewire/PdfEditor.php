@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -17,44 +16,47 @@ class PdfEditor extends Component
 
     public $imageFile;
 
-    public $pdfUrl;
+    public array $overlays = [];
+
+    #[On('save-overlays')]
+    public function saveOverlays(array $overlays): void
+    {
+        $this->overlays = $overlays;
+        ds($overlays);
+        // Example persistence (disabled by default)
+        // foreach ($overlays as $overlay) {
+        //     \App\Models\OverlayPosition::create([
+        //         user_doc_id => $this->userDoc->id,
+        //         top => $overlay['top'],
+        //         left => $overlay['left'],
+        //         width => $overlay['width'],
+        //         height => $overlay['height'],
+        //         image_url => $overlay['src'],
+        //     ]);
+        // }
+
+        logger()->info('Overlay coordinates saved:', $overlays);
+        session()->flash('message', 'Overlay positions saved.');
+    }
 
     public function updatedPdfFile()
     {
-        ds(__FUNCTION__);
-        $this->validate([
-            'pdfFile' => 'required|file|mimes:pdf|max:10240',
-        ]);
-
+        $this->validate(['pdfFile' => 'required|file|mimes:pdf|max:10240']);
         $path = $this->pdfFile->store('uploads', 'public');
-        $this->pdfUrl = Storage::url($path);
-        ds('dispatch pdf-uploaded');
-        $this->dispatch('pdf-uploaded', ['url' => $this->pdfUrl]);
-        $this->reset('pdfFile');
+        $url = \Storage::url($path);
+        $this->dispatch('pdf-uploaded', ['url' => $url]);
     }
 
     public function updatedImageFile()
     {
-        $this->validate([
-            'imageFile' => 'required|image|max:2048',
-        ]);
-
+        $this->validate(['imageFile' => 'required|image|max:10240']);
         $path = $this->imageFile->store('uploads', 'public');
-        $imageUrl = Storage::url($path);
-
-        $this->dispatch('image-uploaded', ['url' => $imageUrl]);
-        $this->reset('imageFile');
+        $url = \Storage::url($path);
+        $this->dispatch('image-uploaded', ['url' => $url]);
     }
 
     public function render()
     {
         return view('livewire.pdf-editor.index');
-    }
-
-    public function placeholder(array $params = []): View
-    {
-        ds(__FUNCTION__);
-
-        return view('livewire.pdf-editor.loading', $params);
     }
 }

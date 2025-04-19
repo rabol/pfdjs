@@ -16,6 +16,12 @@
                 @livewire('pdf-editor')
             </div>
         </div>
+
+        <div id="overlay-info-box" class="fixed bottom-4 left-4 z-50 hidden max-h-[60vh] w-[320px] overflow-y-auto rounded-lg bg-white p-4 text-sm text-gray-800 shadow-xl ring-1 ring-gray-300">
+            <button type="button" class="absolute right-2 top-2 text-gray-400 hover:text-red-600" onclick="document.getElementById('overlay-info-box').classList.add('hidden')" title="Close">✕</button>
+            <div id="overlay-info-content" class="mt-4 whitespace-pre-wrap break-words text-xs"></div>
+        </div>
+
         @livewireScripts
     </body>
 
