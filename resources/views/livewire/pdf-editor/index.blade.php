@@ -58,8 +58,10 @@
         });
 
         window.addEventListener('message', event => {
+            console.log("event", event);
             if (event.data.type === 'overlays-exported') {
                 const overlays = event.data.data;
+                console.log("overlays", event.data);
                 Livewire.dispatch('save-overlays', {
                     overlays
                 });

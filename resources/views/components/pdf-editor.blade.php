@@ -52,6 +52,30 @@
     @endif
 
     <script>
+        // Track the current page number
+        let currentPageNumber = 1;
+        
+        // Listen for page change events from the iframe
+        window.addEventListener('message', event => {
+            if (event.data.type === 'page-changed') {
+                currentPageNumber = event.data.pageNumber;
+                console.log('Page changed to:', currentPageNumber);
+            }
+        });
+        
+        // Function to get the current page number
+        function getCurrentPageNumber() {
+            const iframe = document.getElementById('pdfIframe');
+            if (!iframe) return 1;
+            
+            // Request current page from iframe
+            iframe.contentWindow.postMessage({
+                type: 'get-current-page'
+            }, '*');
+            
+            return currentPageNumber;
+        }
+        
         window.addEventListener('pdf-uploaded', event => {
             const iframe = document.getElementById('pdfIframe');
             if (!iframe) return;

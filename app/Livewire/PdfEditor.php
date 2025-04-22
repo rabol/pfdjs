@@ -24,16 +24,18 @@ class PdfEditor extends Component
         $this->overlays = $overlays;
         ds($overlays);
         // Example persistence (disabled by default)
-        // foreach ($overlays as $overlay) {
-        //     \App\Models\OverlayPosition::create([
-        //         user_doc_id => $this->userDoc->id,
-        //         top => $overlay['top'],
-        //         left => $overlay['left'],
-        //         width => $overlay['width'],
-        //         height => $overlay['height'],
-        //         image_url => $overlay['src'],
-        //     ]);
-        // }
+        foreach ($overlays as $overlay) {
+            // dd($overlay);
+            \App\Models\OverlayPosition::create([
+                // user_doc_id => $this->userDoc->id,
+                "user_doc_id" => 0,
+                "top" => $overlay["top"],
+                "left" => $overlay["left"],
+                "width" => $overlay["width"],
+                "height" => $overlay["height"],
+                "image_url" => $overlay["src"],
+            ]);
+        }
 
         logger()->info('Overlay coordinates saved:', $overlays);
         session()->flash('message', 'Overlay positions saved.');

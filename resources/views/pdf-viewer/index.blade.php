@@ -172,6 +172,40 @@
 
             const container = document.getElementById('pdf-container');
             const overlayInfo = document.getElementById('overlay-info');
+            
+            // Add a variable to track the current page number
+            let currentPageNumber = 1;
+            
+            // Function to get the current page number
+            function getCurrentPageNumber() {
+                const pages = Array.from(document.querySelectorAll('.page-wrapper'));
+                const centerY = container.scrollTop + container.clientHeight / 2;
+                
+                let closestPage = null;
+                let minDistance = Infinity;
+                
+                pages.forEach((page, index) => {
+                    const offset = page.offsetTop + page.offsetHeight / 2;
+                    const distance = Math.abs(offset - centerY);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestPage = index + 1; // Page numbers are 1-indexed
+                    }
+                });
+                
+                return closestPage || 1;
+            }
+            
+            // Update current page number on scroll
+            container.addEventListener('scroll', () => {
+                currentPageNumber = getCurrentPageNumber();
+                
+                // Notify parent window of page change
+                window.parent.postMessage({
+                    type: 'page-changed',
+                    pageNumber: currentPageNumber
+                }, '*');
+            });
 
             const scaleOverlayLayer = () => {
                 const wrappers = document.querySelectorAll('.page-wrapper');
@@ -234,6 +268,14 @@
                     scaleOverlayLayer();
                 }
 
+                if (type === 'get-current-page') {
+                    // Respond with the current page number
+                    window.parent.postMessage({
+                        type: 'current-page',
+                        pageNumber: currentPageNumber
+                    }, '*');
+                }
+
                 if (type === 'add-image' && url) {
                     const wrapper = getClosestPage();
                     if (!wrapper) return;
@@ -280,6 +322,7 @@
                 if (type === 'save-overlays') {
                     const overlays = document.querySelectorAll('.image-overlay');
                     const data = [];
+                    console.log("overlays", overlays);
 
                     overlays.forEach(overlay => {
                         data.push({
@@ -293,6 +336,29 @@
                     window.parent.postMessage({
                         type: 'overlays-saved',
                         overlays: data
+                    }, '*');
+                }
+
+                if (type === 'export-overlays') {
+                    const overlays = document.querySelectorAll('.image-overlay');
+                    const data = [];
+                    // Use our tracked current page number instead of PDFViewerApplication
+                    overlays.forEach(overlay => {
+                        console.log("overlay", overlay);
+                        const img = overlay.querySelector('img');
+                        data.push({
+                            pageNumber: currentPageNumber,
+                            top: parseFloat(overlay.style.top),
+                            left: parseFloat(overlay.style.left), 
+                            width: parseFloat(overlay.style.width),
+                            height: parseFloat(overlay.style.height),
+                            src: img.src
+                        });
+                    });
+                    console.log("data", data);
+                    window.parent.postMessage({
+                        type: 'overlays-exported',
+                        data: data
                     }, '*');
                 }
             });
@@ -316,12 +382,12 @@
 
             function showOverlayInfo(el) {
                 overlayInfo.innerHTML = `
-            Top: ${parseFloat(el.style.top).toFixed(2)}% |
-            Left: ${parseFloat(el.style.left).toFixed(2)}% |
-            Width: ${parseFloat(el.style.width).toFixed(2)}% |
-            Height: ${parseFloat(el.style.height).toFixed(2)}%
-            <button onclick="document.getElementById('overlay-info').style.display='none'">Close</button>
-        `;
+                    Top: ${parseFloat(el.style.top).toFixed(2)}% |
+                    Left: ${parseFloat(el.style.left).toFixed(2)}% |
+                    Width: ${parseFloat(el.style.width).toFixed(2)}% |
+                    Height: ${parseFloat(el.style.height).toFixed(2)}%
+                    <button onclick="document.getElementById('overlay-info').style.display='none'">Close</button>
+                `;
                 overlayInfo.style.display = 'block';
             }
 
