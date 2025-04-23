@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use Livewire\Attributes\Lazy;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
+#[Lazy]
 class PdfEditor extends Component
 {
     use WithFileUploads;
@@ -22,18 +24,18 @@ class PdfEditor extends Component
     public function saveOverlays(array $overlays): void
     {
         $this->overlays = $overlays;
-        ds($overlays);
+
         // Example persistence (disabled by default)
         foreach ($overlays as $overlay) {
             // dd($overlay);
             \App\Models\OverlayPosition::create([
                 // user_doc_id => $this->userDoc->id,
-                "user_doc_id" => 0,
-                "top" => $overlay["top"],
-                "left" => $overlay["left"],
-                "width" => $overlay["width"],
-                "height" => $overlay["height"],
-                "image_url" => $overlay["src"],
+                'user_doc_id' => 0,
+                'top' => $overlay['top'],
+                'left' => $overlay['left'],
+                'width' => $overlay['width'],
+                'height' => $overlay['height'],
+                'image_url' => $overlay['src'],
             ]);
         }
 
@@ -60,5 +62,10 @@ class PdfEditor extends Component
     public function render()
     {
         return view('livewire.pdf-editor.index');
+    }
+
+    public function placeholder()
+    {
+        return view('livewire.pdf-editor.loading');
     }
 }
