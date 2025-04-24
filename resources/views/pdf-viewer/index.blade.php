@@ -169,7 +169,6 @@
         <script type="module">
             import * as pdfjsLib from '/js/pdfjs/build/pdf.mjs';
             pdfjsLib.GlobalWorkerOptions.workerSrc = '/js/pdfjs/build/pdf.worker.mjs';
-
             const container = document.getElementById('pdf-container');
             const overlayInfo = document.getElementById('overlay-info');
             
@@ -235,6 +234,7 @@
                     container.innerHTML = '';
                     const loadingTask = pdfjsLib.getDocument(url);
                     const pdf = await loadingTask.promise;
+                    console.log("pdfjsLib", container);
 
                     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
                         const page = await pdf.getPage(pageNumber);
@@ -289,6 +289,7 @@
 
                     const overlay = document.createElement('div');
                     overlay.className = 'image-overlay';
+                    overlay.dataset.pageNumber = currentPageNumber;
                     overlay.style.width = '20%';
                     overlay.style.height = '20%';
                     overlay.style.left = '40%';
@@ -346,8 +347,9 @@
                     overlays.forEach(overlay => {
                         console.log("overlay", overlay);
                         const img = overlay.querySelector('img');
+                        const pageNumber = overlay.dataset.pageNumber;
                         data.push({
-                            pageNumber: currentPageNumber,
+                            pageNumber: pageNumber,
                             top: parseFloat(overlay.style.top),
                             left: parseFloat(overlay.style.left), 
                             width: parseFloat(overlay.style.width),

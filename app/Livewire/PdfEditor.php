@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
-use Livewire\Attributes\Lazy;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-#[Lazy]
 class PdfEditor extends Component
 {
     use WithFileUploads;
@@ -31,6 +29,7 @@ class PdfEditor extends Component
             \App\Models\OverlayPosition::create([
                 // user_doc_id => $this->userDoc->id,
                 'user_doc_id' => 0,
+                'page_number' => $overlay['pageNumber'],
                 'top' => $overlay['top'],
                 'left' => $overlay['left'],
                 'width' => $overlay['width'],
@@ -61,6 +60,7 @@ class PdfEditor extends Component
 
     public function render()
     {
+        \Log::info('PdfEditor component is rendering');
         return view('livewire.pdf-editor.index');
     }
 

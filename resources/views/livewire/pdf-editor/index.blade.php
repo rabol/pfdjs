@@ -26,6 +26,7 @@
         }
 
         window.addEventListener('pdf-uploaded', event => {
+            console.log("pdf-uploaded", event);
             hideOverlayInfoBox(); // hide info when uploading new PDF
             const url = event.detail[0].url;
             const iframe = document.getElementById('pdfIframe');
