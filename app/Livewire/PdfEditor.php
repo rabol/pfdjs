@@ -29,7 +29,7 @@ class PdfEditor extends Component
             \App\Models\OverlayPosition::create([
                 // user_doc_id => $this->userDoc->id,
                 'user_doc_id' => 0,
-                'page_number' => $overlay['pageNumber'],
+                'page' => $overlay['pageNumber'],
                 'top' => $overlay['top'],
                 'left' => $overlay['left'],
                 'width' => $overlay['width'],
