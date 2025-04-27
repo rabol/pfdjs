@@ -12,11 +12,11 @@ Route::get('/pdfviewer', function () {
     return view('pdfviewer');
 });
 
-Route::get('/pdf/viewer', function () {
-    return view('pdf-viewer.index', [
+Route::get('/pdf-viewer', function () {
+    return view('pdf-viewer', [
         'pdf' => request('pdf'),
     ]);
-})->name('pdf.viewer');
+})->name('pdf-viewer');
 
 Route::get('/pdf', function () {
     return view('pdf');

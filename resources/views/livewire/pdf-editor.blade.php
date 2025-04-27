@@ -2,21 +2,21 @@
     <div class="flex flex-col items-center justify-center gap-2 sm:flex-row sm:justify-between">
         <label class="relative inline-flex cursor-pointer items-center rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">
             <span>Upload & Display PDF</span>
-            <input type="file" wire:model="pdfFile" accept="application/pdf" class="absolute inset-0 cursor-pointer opacity-0" />
+            <input accept="application/pdf" class="absolute inset-0 cursor-pointer opacity-0" type="file" wire:model="pdfFile" />
         </label>
 
         <label class="relative inline-flex cursor-pointer items-center rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700">
             <span>Upload & Add Image</span>
-            <input type="file" wire:model="imageFile" accept="image/*" class="absolute inset-0 cursor-pointer opacity-0" />
+            <input accept="image/*" class="absolute inset-0 cursor-pointer opacity-0" type="file" wire:model="imageFile" />
         </label>
 
-        <button type="button" class="rounded bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700" onclick="document.getElementById('pdfIframe')?.contentWindow?.postMessage({ type: 'export-overlays' }, '*')">
+        <button class="rounded bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700" onclick="document.getElementById('pdfIframe')?.contentWindow?.postMessage({ type: 'export-overlays' }, '*')" type="button">
             Save Overlays
         </button>
     </div>
 
     <div class="mt-4 flex-1 overflow-hidden">
-        <iframe id="pdfIframe" src="{{ route('pdf.viewer', [], true) }}" class="h-full w-full rounded border border-gray-300" loading="lazy"></iframe>
+        <iframe class="h-full w-full rounded border border-gray-300" id="pdfIframe" loading="lazy" src="{{ route('pdf-viewer', [], true) }}"></iframe>
     </div>
 
     <script>

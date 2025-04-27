@@ -58,14 +58,13 @@ class PdfEditor extends Component
         $this->dispatch('image-uploaded', ['url' => $url]);
     }
 
-    public function render()
-    {
-        \Log::info('PdfEditor component is rendering');
-        return view('livewire.pdf-editor.index');
-    }
-
     public function placeholder()
     {
-        return view('livewire.pdf-editor.loading');
+        return view('livewire.pdf-editor-loading');
+    }
+
+    public function render()
+    {
+        return view('livewire.pdf-editor');
     }
 }
