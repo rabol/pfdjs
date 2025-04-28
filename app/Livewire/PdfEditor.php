@@ -20,9 +20,14 @@ class PdfEditor extends Component
 
     public ?string $pdfPath = null;
 
-    public function mount(?string $pdfPath = null): void
+    public string $jsonOverlays = '[]';
+
+    public function mount(?string $pdfPath = null, array $overlays = []): void
     {
         $this->pdfPath = $pdfPath;
+        $this->overlays = $overlays;
+
+        $this->jsonOverlays = json_encode($overlays);
     }
 
     #[On('save-overlays')]
@@ -62,6 +67,7 @@ class PdfEditor extends Component
         $this->validate(['imageFile' => 'required|image|max:10240']);
         $path = $this->imageFile->store('uploads', 'public');
         $url = \Storage::url($path);
+
         $this->dispatch('image-uploaded', ['url' => $url]);
     }
 

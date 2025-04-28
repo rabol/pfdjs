@@ -26,8 +26,7 @@
         }
 
         window.addEventListener('pdf-uploaded', event => {
-            console.log("pdf-uploaded", event);
-            hideOverlayInfoBox(); // hide info when uploading new PDF
+            hideOverlayInfoBox();
             const url = event.detail[0].url;
             const iframe = document.getElementById('pdfIframe');
             if (!iframe) return;
@@ -47,7 +46,7 @@
         });
 
         window.addEventListener('image-uploaded', event => {
-            hideOverlayInfoBox(); // hide info when uploading image
+            hideOverlayInfoBox();
             const url = event.detail[0].url;
             const iframe = document.getElementById('pdfIframe');
             if (!iframe?.contentWindow) return;
@@ -59,10 +58,8 @@
         });
 
         window.addEventListener('message', event => {
-            console.log("event", event);
             if (event.data.type === 'overlays-exported') {
                 const overlays = event.data.data;
-                console.log("overlays", event.data);
                 Livewire.dispatch('save-overlays', {
                     overlays
                 });
@@ -84,29 +81,41 @@
                 const iframe = document.getElementById('pdfIframe');
                 if (!iframe) return;
 
-                function postLoadPdf() {
+                function postLoadEverything() {
                     const tryPost = () => {
                         if (iframe.contentWindow?.isViewerReady) {
                             iframe.contentWindow.postMessage({
                                 type: 'load-pdf',
                                 url: '{{ $pdfPath }}'
                             }, '*');
+
+                            const overlaysData = {!! $jsonOverlays !!};
+
+                            if (overlaysData.length > 0) {
+                                setTimeout(() => {
+                                    iframe.contentWindow.postMessage({
+                                        type: 'load-overlays',
+                                        overlays: overlaysData
+                                    }, '*');
+                                }, 500);
+                            }
+
                         } else {
                             setTimeout(tryPost, 100);
                         }
                     };
-
                     tryPost();
                 }
 
                 if (iframe.contentDocument?.readyState === 'complete') {
-                    postLoadPdf();
+                    postLoadEverything();
                 } else {
-                    iframe.addEventListener('load', postLoadPdf, {
+                    iframe.addEventListener('load', postLoadEverything, {
                         once: true
                     });
                 }
             });
         </script>
     @endif
+
 </div>

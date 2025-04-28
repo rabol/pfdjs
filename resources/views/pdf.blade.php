@@ -18,7 +18,19 @@
                         <div class="h-10 w-10 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
                     </div>
                     <div class="hidden h-full" id="pdf-editor-content">
-                        @livewire('pdf-editor', ['/storage/uploads/HqeJTrVHtPsi7pfVLzxehpIYpGCPcGMpeNL280zk.pdf'])
+                        @livewire('pdf-editor', [
+                            'pdfPath' => '/storage/uploads/HqeJTrVHtPsi7pfVLzxehpIYpGCPcGMpeNL280zk.pdf',
+                            'overlays' => [
+                                [
+                                    'pageNumber' => 1,
+                                    'top' => 49.1284,
+                                    'left' => 66.8722,
+                                    'width' => 20,
+                                    'height' => 20,
+                                    'src' => 'https://pdfjs.test/storage/uploads/CU1ryBQPyfqz4sLIdSjARDraorqmrtV59XGx3xRc.png',
+                                ],
+                            ],
+                        ])
                     </div>
                 </div>
             </div>
@@ -38,8 +50,22 @@
                 document.getElementById('pdf-editor-content').classList.remove('hidden');
 
                 // Force reload the component
-                Livewire.dispatch('$refresh');
-                console.log('Manually triggering PDF editor load');
+                //Livewire.dispatch('$refresh');
+                //console.log('Manually triggering PDF editor load');
+                // Try to detect if Livewire component has pdfPath
+                const component = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+                if (component) {
+                    const pdfPath = component.get('pdfPath');
+
+                    if (!pdfPath) {
+                        console.log('No pdfPath provided, dispatching Livewire $refresh.');
+                        Livewire.dispatch('$refresh');
+                    } else {
+                        console.log('pdfPath exists, no $refresh needed.');
+                    }
+                } else {
+                    console.log('Could not find Livewire component');
+                }
 
             };
 

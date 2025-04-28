@@ -230,7 +230,8 @@
             window.addEventListener("message", async function(event) {
                 const {
                     type,
-                    url
+                    url,
+                    overlays
                 } = event.data;
 
                 if (type === 'load-pdf' && url) {
@@ -366,7 +367,56 @@
                         data: data
                     }, '*');
                 }
+
+
+                if (type === 'load-overlays' && overlays && Array.isArray(overlays)) {
+                    console.log('Loading overlays:', overlays); // ← Add this line
+                    overlays.forEach(data => {
+                        addImageFromData(data);
+                    });
+                }
             });
+
+            function collectOverlays() {
+                const data = [];
+                document.querySelectorAll('.image-overlay').forEach(el => {
+                    const img = el.querySelector('img');
+                    data.push({
+                        top: parseFloat(el.style.top),
+                        left: parseFloat(el.style.left),
+                        width: parseFloat(el.style.width),
+                        height: parseFloat(el.style.height),
+                        image_url: img?.src || '',
+                    });
+                });
+                return data;
+            }
+
+            function addImageFromData(data) {
+                const wrapper = getClosestPage();
+                if (!wrapper) return;
+
+                const overlayLayer = wrapper.querySelector('.overlay-layer');
+                const img = new Image();
+                img.src = data.src;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.pointerEvents = 'none';
+
+                const overlay = document.createElement('div');
+                overlay.className = 'image-overlay';
+                overlay.dataset.pageNumber = data.pageNumber;
+                overlay.style.width = `${data.width}%`;
+                overlay.style.height = `${data.height}%`;
+                overlay.style.left = `${data.left}%`;
+                overlay.style.top = `${data.top}%`;
+
+                overlay.appendChild(img);
+
+                overlayLayer.appendChild(overlay);
+                addResizeHandles(overlay, overlayLayer);
+                makeDraggable(overlay, overlayLayer);
+            }
 
             function getClosestPage() {
                 const pages = Array.from(document.querySelectorAll('.page-wrapper'));
