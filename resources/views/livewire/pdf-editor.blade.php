@@ -77,4 +77,36 @@
             }
         });
     </script>
+
+    @if ($pdfPath)
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const iframe = document.getElementById('pdfIframe');
+                if (!iframe) return;
+
+                function postLoadPdf() {
+                    const tryPost = () => {
+                        if (iframe.contentWindow?.isViewerReady) {
+                            iframe.contentWindow.postMessage({
+                                type: 'load-pdf',
+                                url: '{{ $pdfPath }}'
+                            }, '*');
+                        } else {
+                            setTimeout(tryPost, 100);
+                        }
+                    };
+
+                    tryPost();
+                }
+
+                if (iframe.contentDocument?.readyState === 'complete') {
+                    postLoadPdf();
+                } else {
+                    iframe.addEventListener('load', postLoadPdf, {
+                        once: true
+                    });
+                }
+            });
+        </script>
+    @endif
 </div>

@@ -18,6 +18,13 @@ class PdfEditor extends Component
 
     public array $overlays = [];
 
+    public ?string $pdfPath = null;
+
+    public function mount(?string $pdfPath = null): void
+    {
+        $this->pdfPath = $pdfPath;
+    }
+
     #[On('save-overlays')]
     public function saveOverlays(array $overlays): void
     {

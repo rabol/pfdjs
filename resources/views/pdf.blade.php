@@ -18,7 +18,7 @@
                         <div class="h-10 w-10 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
                     </div>
                     <div class="hidden h-full" id="pdf-editor-content">
-                        @livewire('pdf-editor')
+                        @livewire('pdf-editor', ['/storage/uploads/HqeJTrVHtPsi7pfVLzxehpIYpGCPcGMpeNL280zk.pdf'])
                     </div>
                 </div>
             </div>

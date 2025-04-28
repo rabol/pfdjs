@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8" />
         <title>PDF Viewer</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
         <style>
             html,
             body {
@@ -167,22 +167,25 @@
         <div id="overlay-info"></div>
 
         <script type="module">
+            // We need this later to see if the iframe is ready
+            window.isViewerReady = false
+
             import * as pdfjsLib from '/js/pdfjs/build/pdf.mjs';
             pdfjsLib.GlobalWorkerOptions.workerSrc = '/js/pdfjs/build/pdf.worker.mjs';
             const container = document.getElementById('pdf-container');
             const overlayInfo = document.getElementById('overlay-info');
-            
+
             // Add a variable to track the current page number
             let currentPageNumber = 1;
-            
+
             // Function to get the current page number
             function getCurrentPageNumber() {
                 const pages = Array.from(document.querySelectorAll('.page-wrapper'));
                 const centerY = container.scrollTop + container.clientHeight / 2;
-                
+
                 let closestPage = null;
                 let minDistance = Infinity;
-                
+
                 pages.forEach((page, index) => {
                     const offset = page.offsetTop + page.offsetHeight / 2;
                     const distance = Math.abs(offset - centerY);
@@ -191,14 +194,14 @@
                         closestPage = index + 1; // Page numbers are 1-indexed
                     }
                 });
-                
+
                 return closestPage || 1;
             }
-            
+
             // Update current page number on scroll
             container.addEventListener('scroll', () => {
                 currentPageNumber = getCurrentPageNumber();
-                
+
                 // Notify parent window of page change
                 window.parent.postMessage({
                     type: 'page-changed',
@@ -351,7 +354,7 @@
                         data.push({
                             pageNumber: pageNumber,
                             top: parseFloat(overlay.style.top),
-                            left: parseFloat(overlay.style.left), 
+                            left: parseFloat(overlay.style.left),
                             width: parseFloat(overlay.style.width),
                             height: parseFloat(overlay.style.height),
                             src: img.src
@@ -492,6 +495,9 @@
                     showOverlayInfo(el);
                 });
             }
+
+            // After setting up event listeners:
+            window.isViewerReady = true;
         </script>
     </body>
 
