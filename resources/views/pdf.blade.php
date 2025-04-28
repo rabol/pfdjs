@@ -42,45 +42,7 @@
         </div>
 
         @livewireScripts
-
-        <script>
-            window.onload = function() {
-                // Show the PDF editor content and hide the placeholder
-                document.getElementById('pdf-editor-placeholder').classList.add('hidden');
-                document.getElementById('pdf-editor-content').classList.remove('hidden');
-
-                // Force reload the component
-                //Livewire.dispatch('$refresh');
-                //console.log('Manually triggering PDF editor load');
-                // Try to detect if Livewire component has pdfPath
-                const component = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
-                if (component) {
-                    const pdfPath = component.get('pdfPath');
-
-                    if (!pdfPath) {
-                        console.log('No pdfPath provided, dispatching Livewire $refresh.');
-                        Livewire.dispatch('$refresh');
-                    } else {
-                        console.log('pdfPath exists, no $refresh needed.');
-                    }
-                } else {
-                    console.log('Could not find Livewire component');
-                }
-
-            };
-
-            // Check for JavaScript errors
-            window.onerror = function(msg, url, lineNo, columnNo, error) {
-                console.error('Error: ' + msg + '\nURL: ' + url + '\nLine: ' + lineNo + '\nColumn: ' + columnNo + '\nError object: ' + JSON.stringify(error));
-                return false;
-            };
-
-            // Log when the page is fully loaded
-            window.addEventListener('load', function() {
-                console.log('Page fully loaded');
-                console.log('PDF Editor container:', document.getElementById('pdf-editor-container'));
-            });
-        </script>
+        @stack('scripts')
     </body>
 
 </html>

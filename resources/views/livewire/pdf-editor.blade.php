@@ -19,6 +19,38 @@
         <iframe class="h-full w-full rounded border border-gray-300" id="pdfIframe" loading="lazy" src="{{ route('pdf-viewer', [], true) }}"></iframe>
     </div>
 
+    @push('scripts')
+        <script>
+            window.onload = function() {
+                // Show the PDF editor content and hide the placeholder
+                document.getElementById('pdf-editor-placeholder').classList.add('hidden');
+                document.getElementById('pdf-editor-content').classList.remove('hidden');
+
+                // Force reload the component
+                // Try to detect if Livewire component has pdfPath
+                const component = Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'));
+                if (component) {
+                    const pdfPath = component.get('pdfPath');
+
+                    if (!pdfPath) {
+                        Livewire.dispatch('$refresh');
+                    }
+                }
+
+            };
+
+            // Check for JavaScript errors
+            window.onerror = function(msg, url, lineNo, columnNo, error) {
+                console.error('Error: ' + msg + '\nURL: ' + url + '\nLine: ' + lineNo + '\nColumn: ' + columnNo + '\nError object: ' + JSON.stringify(error));
+                return false;
+            };
+
+            // Log when the page is fully loaded
+            window.addEventListener('load', function() {
+
+            });
+        </script>
+    @endpush
     <script>
         function hideOverlayInfoBox() {
             const box = document.getElementById('overlay-info-box');

@@ -238,7 +238,7 @@
                     container.innerHTML = '';
                     const loadingTask = pdfjsLib.getDocument(url);
                     const pdf = await loadingTask.promise;
-                    console.log("pdfjsLib", container);
+
 
                     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
                         const page = await pdf.getPage(pageNumber);
@@ -327,7 +327,7 @@
                 if (type === 'save-overlays') {
                     const overlays = document.querySelectorAll('.image-overlay');
                     const data = [];
-                    console.log("overlays", overlays);
+
 
                     overlays.forEach(overlay => {
                         data.push({
@@ -349,7 +349,7 @@
                     const data = [];
                     // Use our tracked current page number instead of PDFViewerApplication
                     overlays.forEach(overlay => {
-                        console.log("overlay", overlay);
+
                         const img = overlay.querySelector('img');
                         const pageNumber = overlay.dataset.pageNumber;
                         data.push({
@@ -361,7 +361,7 @@
                             src: img.src
                         });
                     });
-                    console.log("data", data);
+
                     window.parent.postMessage({
                         type: 'overlays-exported',
                         data: data
@@ -370,7 +370,7 @@
 
 
                 if (type === 'load-overlays' && overlays && Array.isArray(overlays)) {
-                    console.log('Loading overlays:', overlays); // ← Add this line
+
                     overlays.forEach(data => {
                         addImageFromData(data);
                     });
