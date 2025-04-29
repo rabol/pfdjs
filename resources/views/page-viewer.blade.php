@@ -12,10 +12,12 @@
     <body class="flex min-h-screen flex-col bg-gray-100">
 
         <div class="flex flex-1 items-center justify-center p-4">
-            <div class="w-full max-w-7xl">
+            <div class="w-full max-w-5xl">
 
                 <!-- Upload Component (Separate) -->
+
                 <livewire:pdf-overlay-uploader />
+
 
                 <!-- PDF Viewer Card -->
                 <div class="relative mx-auto h-[90vh] w-full max-w-5xl overflow-hidden rounded bg-white shadow">

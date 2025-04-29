@@ -1,4 +1,3 @@
-
 import * as pdfjsLib from 'pdfjs-dist/build/pdf.mjs';
 import 'pdfjs-dist/web/pdf_viewer.css';
 
@@ -30,13 +29,26 @@ window.pdfViewer = function () {
         const page = await pdf.getPage(pageNumber);
         const viewport = page.getViewport({ scale: 1.5 });
 
-        const wrapper = document.createElement('div');
-        wrapper.className = 'page-wrapper bg-white shadow rounded-md overflow-hidden';
-        wrapper.style.position = 'relative';
-
         const canvas = document.createElement('canvas');
         canvas.width = viewport.width;
         canvas.height = viewport.height;
+
+        canvas.style.display = 'block';
+        canvas.style.width = '100%';
+        canvas.style.height = 'auto';
+        canvas.style.boxSizing = 'border-box';
+        canvas.style.margin = '0';
+        canvas.style.padding = '0';
+        canvas.style.border = 'none';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'page-wrapper bg-white shadow overflow-hidden';
+        wrapper.style.position = 'relative';
+        wrapper.style.margin = '0';
+        wrapper.style.padding = '0';
+        wrapper.style.width = '100%';
+        wrapper.style.maxWidth = '100%';
+        wrapper.style.display = 'block';
 
         const overlayLayer = document.createElement('div');
         overlayLayer.className = 'overlay-layer';
@@ -52,10 +64,7 @@ window.pdfViewer = function () {
         pagesContainer.appendChild(wrapper);
 
         const context = canvas.getContext('2d');
-        await page.render({
-          canvasContext: context,
-          viewport,
-        }).promise;
+        await page.render({ canvasContext: context, viewport }).promise;
       }
 
       scaleOverlayLayers();
@@ -69,7 +78,6 @@ window.pdfViewer = function () {
 
 function scaleOverlayLayers() {
   const wrappers = document.querySelectorAll('.page-wrapper');
-
   wrappers.forEach(wrapper => {
     const canvas = wrapper.querySelector('canvas');
     const overlayLayer = wrapper.querySelector('.overlay-layer');
@@ -86,7 +94,6 @@ function scaleOverlayLayers() {
 
 window.addEventListener('overlayUploaded', e => {
   const imagePath = e.detail.path;
-
   const wrapper = getClosestPage();
   if (!wrapper) return;
 
@@ -153,6 +160,7 @@ function insertOverlay(overlayInfo) {
   overlayLayer.appendChild(wrapper);
 
   makeDraggable(wrapper, overlayInfo, overlayLayer);
+  addResizeHandles(wrapper, overlayInfo, overlayLayer);
 }
 
 function restoreOverlays() {
@@ -162,7 +170,6 @@ function restoreOverlays() {
 function getClosestPage() {
   const container = document.getElementById('viewerContainer');
   const pages = Array.from(container.querySelectorAll('.page-wrapper'));
-
   const containerTop = container.scrollTop;
   const containerCenter = containerTop + container.clientHeight / 2;
 
@@ -171,7 +178,6 @@ function getClosestPage() {
     const pageHeight = page.offsetHeight;
     const pageCenter = pageTop + pageHeight / 2;
     const distance = Math.abs(pageCenter - containerCenter);
-
     return distance < closest.distance ? { el: page, distance } : closest;
   }, { el: null, distance: Infinity }).el;
 }
@@ -182,6 +188,7 @@ function getOverlayLayerByPageNumber(pageNumber) {
 
 function makeDraggable(wrapper, overlayInfo, container) {
   wrapper.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('resize-handle')) return;
     e.preventDefault();
     const startX = e.clientX;
     const startY = e.clientY;
@@ -192,19 +199,16 @@ function makeDraggable(wrapper, overlayInfo, container) {
     function onMouseMove(e) {
       const dx = e.clientX - startX;
       const dy = e.clientY - startY;
-
       const dxPercent = (dx / bounds.width) * 100;
       const dyPercent = (dy / bounds.height) * 100;
 
       let newLeft = startLeft + dxPercent;
       let newTop = startTop + dyPercent;
-
       newLeft = Math.min(Math.max(newLeft, 0), 100 - parseFloat(wrapper.style.width));
       newTop = Math.min(Math.max(newTop, 0), 100 - parseFloat(wrapper.style.height));
 
       wrapper.style.left = `${newLeft}%`;
       wrapper.style.top = `${newTop}%`;
-
       overlayInfo.left = newLeft;
       overlayInfo.top = newTop;
     }
@@ -216,5 +220,118 @@ function makeDraggable(wrapper, overlayInfo, container) {
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
+  });
+}
+
+function addResizeHandles(wrapper, overlayInfo, container) {
+  const positions = ['tl', 'tr', 'bl', 'br', 't', 'b', 'l', 'r'];
+  const cursors = {
+    tl: 'nwse-resize',
+    tr: 'nesw-resize',
+    bl: 'nesw-resize',
+    br: 'nwse-resize',
+    t: 'ns-resize',
+    b: 'ns-resize',
+    l: 'ew-resize',
+    r: 'ew-resize'
+  };
+
+  positions.forEach(pos => {
+    const handle = document.createElement('div');
+    handle.className = `resize-handle ${pos}`;
+    handle.style.position = 'absolute';
+    handle.style.width = '12px';
+    handle.style.height = '12px';
+    handle.style.background = 'rgba(255,255,255,0.9)';
+    handle.style.border = '1px solid #333';
+    handle.style.borderRadius = '9999px';
+    handle.style.boxShadow = '0 0 2px rgba(0,0,0,0.5)';
+    handle.style.zIndex = '1002';
+    handle.style.cursor = cursors[pos];
+
+    if (pos === 'tl') {
+      handle.style.top = '0';
+      handle.style.left = '0';
+    } else if (pos === 'tr') {
+      handle.style.top = '0';
+      handle.style.right = '0';
+    } else if (pos === 'bl') {
+      handle.style.bottom = '0';
+      handle.style.left = '0';
+    } else if (pos === 'br') {
+      handle.style.bottom = '0';
+      handle.style.right = '0';
+    } else if (pos === 't') {
+      handle.style.top = '0';
+      handle.style.left = '50%';
+      handle.style.transform = 'translateX(-50%)';
+    } else if (pos === 'b') {
+      handle.style.bottom = '0';
+      handle.style.left = '50%';
+      handle.style.transform = 'translateX(-50%)';
+    } else if (pos === 'l') {
+      handle.style.left = '0';
+      handle.style.top = '50%';
+      handle.style.transform = 'translateY(-50%)';
+    } else if (pos === 'r') {
+      handle.style.right = '0';
+      handle.style.top = '50%';
+      handle.style.transform = 'translateY(-50%)';
+    }
+
+    wrapper.appendChild(handle);
+
+    let startX, startY, startW, startH, startL, startT;
+
+    const onMouseMove = (e) => {
+      const bounds = container.getBoundingClientRect();
+      const dx = (e.clientX - startX) / bounds.width * 100;
+      const dy = (e.clientY - startY) / bounds.height * 100;
+
+      let newW = startW;
+      let newH = startH;
+      let newL = startL;
+      let newT = startT;
+
+      if (pos.includes('r')) newW = Math.max(5, startW + dx);
+      if (pos.includes('l')) {
+        newW = Math.max(5, startW - dx);
+        newL = Math.max(0, startL + dx);
+      }
+      if (pos.includes('b')) newH = Math.max(5, startH + dy);
+      if (pos.includes('t')) {
+        newH = Math.max(5, startH - dy);
+        newT = Math.max(0, startT + dy);
+      }
+
+      newW = Math.min(newW, 100 - newL);
+      newH = Math.min(newH, 100 - newT);
+
+      wrapper.style.width = `${newW}%`;
+      wrapper.style.height = `${newH}%`;
+      wrapper.style.left = `${newL}%`;
+      wrapper.style.top = `${newT}%`;
+
+      overlayInfo.width = newW;
+      overlayInfo.height = newH;
+      overlayInfo.left = newL;
+      overlayInfo.top = newT;
+    };
+
+    handle.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      startX = e.clientX;
+      startY = e.clientY;
+      startW = parseFloat(wrapper.style.width);
+      startH = parseFloat(wrapper.style.height);
+      startL = parseFloat(wrapper.style.left);
+      startT = parseFloat(wrapper.style.top);
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', () => {
+        document.removeEventListener('mousemove', onMouseMove);
+      }, { once: true });
+    });
   });
 }
