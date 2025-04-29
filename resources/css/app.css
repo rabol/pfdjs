@@ -11,17 +11,24 @@
         "Noto Color Emoji";
 }
 
+/* Force PDF pages to scale to container */
 .pdfViewer .page {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow: hidden;
+  max-width: 100% !important;
+  width: 100% !important;
 }
 
 .pdfViewer canvas {
-    width: 100% !important;
-    height: auto !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+  display: block;
 }
 
 #viewerContainer {
     border: 2px dashed red;
+}
+
+.overlay-layer img {
+    border: 1px dashed #ccc;
+    background: rgba(255, 255, 255, 0.8);
 }
