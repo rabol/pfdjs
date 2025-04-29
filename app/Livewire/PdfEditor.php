@@ -20,14 +20,10 @@ class PdfEditor extends Component
 
     public ?string $pdfPath = null;
 
-    public string $jsonOverlays = '[]';
-
     public function mount(?string $pdfPath = null, array $overlays = []): void
     {
         $this->pdfPath = $pdfPath;
         $this->overlays = $overlays;
-
-        $this->jsonOverlays = json_encode($overlays);
     }
 
     #[On('save-overlays')]
@@ -35,12 +31,9 @@ class PdfEditor extends Component
     {
         $this->overlays = $overlays;
 
-        // Example persistence (disabled by default)
         foreach ($overlays as $overlay) {
-            // dd($overlay);
             \App\Models\OverlayPosition::create([
-                // user_doc_id => $this->userDoc->id,
-                'user_doc_id' => 0,
+                'user_doc_id' => 0, // Example, adjust as needed
                 'page' => $overlay['pageNumber'],
                 'top' => $overlay['top'],
                 'left' => $overlay['left'],
@@ -50,21 +43,27 @@ class PdfEditor extends Component
             ]);
         }
 
-        logger()->info('Overlay coordinates saved:', $overlays);
         session()->flash('message', 'Overlay positions saved.');
     }
 
     public function updatedPdfFile()
     {
-        $this->validate(['pdfFile' => 'required|file|mimes:pdf|max:10240']);
+        $this->validate([
+            'pdfFile' => 'required|file|mimes:pdf|max:10240',
+        ]);
+
         $path = $this->pdfFile->store('uploads', 'public');
         $url = \Storage::url($path);
+
         $this->dispatch('pdf-uploaded', ['url' => $url]);
     }
 
     public function updatedImageFile()
     {
-        $this->validate(['imageFile' => 'required|image|max:10240']);
+        $this->validate([
+            'imageFile' => 'required|image|max:10240',
+        ]);
+
         $path = $this->imageFile->store('uploads', 'public');
         $url = \Storage::url($path);
 

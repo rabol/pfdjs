@@ -11,6 +11,17 @@
         "Noto Color Emoji";
 }
 
-.pdf-viewer {
-    height: 100vh;
+.pdfViewer .page {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden;
+}
+
+.pdfViewer canvas {
+    width: 100% !important;
+    height: auto !important;
+}
+
+#viewerContainer {
+    border: 2px dashed red;
 }

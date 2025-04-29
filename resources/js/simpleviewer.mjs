@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { SignatureEditor } from "pdfjs-dist/types/src/display/editor/signature";
+
 if (!pdfjsLib.getDocument || !pdfjsViewer.PDFViewer) {
     // eslint-disable-next-line no-alert
     alert("Please build the pdfjs-dist library using\n  `gulp dist-install`");
@@ -66,6 +68,7 @@ const pdfViewer = new pdfjsViewer.PDFViewer({
     linkService: pdfLinkService,
     findController: pdfFindController,
     scriptingManager: pdfScriptingManager,
+    
 });
 pdfLinkService.setViewer(pdfViewer);
 pdfScriptingManager.setViewer(pdfViewer);
