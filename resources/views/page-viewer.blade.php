@@ -21,7 +21,10 @@
 
                 <!-- PDF Viewer Card -->
                 <div class="relative mx-auto h-[90vh] w-full max-w-5xl overflow-hidden rounded bg-white shadow">
-                    <livewire:pdf-viewer pdfPath="/storage/uploads/HqeJTrVHtPsi7pfVLzxehpIYpGCPcGMpeNL280zk.pdf" />
+                    <div>
+                        <livewire:pdf-viewer pdfPath="/storage/uploads/HqeJTrVHtPsi7pfVLzxehpIYpGCPcGMpeNL280zk.pdf" />
+                    </div>
+
                 </div>
 
             </div>
@@ -29,6 +32,7 @@
 
         @livewireScripts
         @stack('scripts')
+
     </body>
 
 </html>

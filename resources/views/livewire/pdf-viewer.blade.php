@@ -5,5 +5,6 @@
     </div>
 
 </div>
-
-@vite('resources/js/pdf-viewer.js')
+@push('scripts')
+    @vite('resources/js/pdf-viewer.js')
+@endpush
