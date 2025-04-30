@@ -22,7 +22,8 @@
                 <!-- PDF Viewer Card -->
                 <div class="relative mx-auto h-[90vh] w-full max-w-5xl overflow-hidden rounded bg-white shadow">
                     <div>
-                        <livewire:pdf-viewer pdfPath="/storage/uploads/HqeJTrVHtPsi7pfVLzxehpIYpGCPcGMpeNL280zk.pdf" />
+                        <livewire:pdf-viewer :overlays="[['pageNumber' => 2, 'left' => 10, 'top' => 20, 'width' => 30, 'height' => 40, 'src' => '/storage/uploads/ae3c0TmWaXKwUTjQMokZQganb8aJvlYEimbWxaQi.png']]" pdfPath="/storage/uploads/HqeJTrVHtPsi7pfVLzxehpIYpGCPcGMpeNL280zk.pdf" />
+
                     </div>
 
                 </div>

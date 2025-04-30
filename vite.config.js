@@ -8,9 +8,10 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
-                "resources/css/app.css", 
+                "resources/css/app.css",
                 "resources/js/app.js",
-                'resources/js/pdf-viewer.js',
+                //OLD, one file version'resources/js/pdf-viewer.js',
+                'resources/js/pdfviewer/main.js'
             ],
             refresh: true,
         }),

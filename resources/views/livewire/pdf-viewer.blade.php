@@ -4,7 +4,10 @@
         <div class="m-0 p-0" id="pdfPages"></div>
     </div>
 
+    <script>
+        window.initialOverlays = @json($overlays);
+    </script>
 </div>
 @push('scripts')
-    @vite('resources/js/pdf-viewer.js')
+    @vite('resources/js/pdfviewer/main.js')
 @endpush
