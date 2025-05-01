@@ -63,6 +63,50 @@ export async function initPdfViewer(pdfPath) {
 
     wrapper.appendChild(canvas);
     wrapper.appendChild(overlayLayer);
+    // Enable drag and drop for image overlays
+    overlayLayer.addEventListener('dragover', (e) => {
+      e.preventDefault();
+    });
+
+    overlayLayer.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const files = e.dataTransfer.files;
+      if (!files || !files.length) return;
+
+      const file = files[0];
+      if (!file.type.startsWith('image/')) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const rect = overlayLayer.getBoundingClientRect();
+          const dropX = e.clientX - rect.left;
+          const dropY = e.clientY - rect.top;
+
+          const leftPercent = (dropX / rect.width) * 100;
+          const topPercent = (dropY / rect.height) * 100;
+
+          const widthPercent = (img.width / rect.width) * 100;
+          const heightPercent = (img.height / rect.height) * 100;
+
+          const overlayInfo = {
+            pageNumber,
+            left: leftPercent,
+            top: topPercent,
+            width: widthPercent,
+            height: heightPercent,
+            src: event.target.result,
+          };
+
+          overlaysData.push(overlayInfo);
+          insertOverlay(overlayInfo);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
     pagesContainer.appendChild(wrapper);
 
     const context = canvas.getContext('2d');

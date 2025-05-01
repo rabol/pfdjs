@@ -1,21 +1,17 @@
 export function makeDraggable(wrapper, overlayInfo, container) {
-  function startDrag(e) {
-    if (e.target.classList.contains('resize-handle')) return;
+  wrapper.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('resize-handle') || e.target.tagName === 'BUTTON') return;
     e.preventDefault();
 
-    const isTouch = e.type.startsWith('touch');
-    const startX = isTouch ? e.touches[0].clientX : e.clientX;
-    const startY = isTouch ? e.touches[0].clientY : e.clientY;
+    const startX = e.clientX;
+    const startY = e.clientY;
     const startLeft = parseFloat(wrapper.style.left);
     const startTop = parseFloat(wrapper.style.top);
     const bounds = container.getBoundingClientRect();
 
-    function onMove(ev) {
-      const clientX = ev.type.startsWith('touch') ? ev.touches[0].clientX : ev.clientX;
-      const clientY = ev.type.startsWith('touch') ? ev.touches[0].clientY : ev.clientY;
-
-      const dx = clientX - startX;
-      const dy = clientY - startY;
+    const onMouseMove = (e) => {
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
       const dxPercent = (dx / bounds.width) * 100;
       const dyPercent = (dy / bounds.height) * 100;
 
@@ -28,31 +24,76 @@ export function makeDraggable(wrapper, overlayInfo, container) {
       wrapper.style.top = `${newTop}%`;
       overlayInfo.left = newLeft;
       overlayInfo.top = newTop;
-    }
+    };
 
-    function endDrag() {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', endDrag);
-      document.removeEventListener('touchmove', onMove);
-      document.removeEventListener('touchend', endDrag);
-    }
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
 
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', endDrag);
-    document.addEventListener('touchmove', onMove, { passive: false });
-    document.addEventListener('touchend', endDrag);
-  }
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
 
-  wrapper.addEventListener('mousedown', startDrag);
-  wrapper.addEventListener('touchstart', startDrag, { passive: false });
+  wrapper.addEventListener('touchstart', (e) => {
+    if (e.target.classList.contains('resize-handle') || e.target.tagName === 'BUTTON') return;
+    const touch = e.touches[0];
+    const startX = touch.clientX;
+    const startY = touch.clientY;
+    const startLeft = parseFloat(wrapper.style.left);
+    const startTop = parseFloat(wrapper.style.top);
+    const bounds = container.getBoundingClientRect();
+
+    const onTouchMove = (e) => {
+      const touch = e.touches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+      const dxPercent = (dx / bounds.width) * 100;
+      const dyPercent = (dy / bounds.height) * 100;
+
+      let newLeft = startLeft + dxPercent;
+      let newTop = startTop + dyPercent;
+      newLeft = Math.min(Math.max(newLeft, 0), 100 - parseFloat(wrapper.style.width));
+      newTop = Math.min(Math.max(newTop, 0), 100 - parseFloat(wrapper.style.height));
+
+      wrapper.style.left = `${newLeft}%`;
+      wrapper.style.top = `${newTop}%`;
+      overlayInfo.left = newLeft;
+      overlayInfo.top = newTop;
+    };
+
+    const onTouchEnd = () => {
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+    };
+
+    document.addEventListener('touchmove', onTouchMove);
+    document.addEventListener('touchend', onTouchEnd);
+  }, { passive: false });
 }
-
 
 export function addResizeHandles(wrapper, overlayInfo, container) {
   const positions = ['tl', 'tr', 'bl', 'br', 't', 'b', 'l', 'r'];
   const cursors = {
-    tl: 'nwse-resize', tr: 'nesw-resize', bl: 'nesw-resize', br: 'nwse-resize',
-    t: 'ns-resize', b: 'ns-resize', l: 'ew-resize', r: 'ew-resize'
+    tl: 'nwse-resize',
+    tr: 'nesw-resize',
+    bl: 'nesw-resize',
+    br: 'nwse-resize',
+    t: 'ns-resize',
+    b: 'ns-resize',
+    l: 'ew-resize',
+    r: 'ew-resize'
+  };
+
+  const transforms = {
+    tl: 'translate(-50%, -50%)',
+    tr: 'translate(50%, -50%)',
+    bl: 'translate(-50%, 50%)',
+    br: 'translate(50%, 50%)',
+    t: 'translate(-50%, -50%)',
+    b: 'translate(-50%, 50%)',
+    l: 'translate(-50%, -50%)',
+    r: 'translate(50%, -50%)'
   };
 
   positions.forEach(pos => {
@@ -68,7 +109,8 @@ export function addResizeHandles(wrapper, overlayInfo, container) {
       boxShadow: '0 0 2px rgba(0,0,0,0.5)',
       zIndex: '1002',
       cursor: cursors[pos],
-      transform: 'translate(-50%, -50%)'
+      transform: transforms[pos],
+      touchAction: 'none'
     });
 
     if (pos.includes('t')) handle.style.top = '0';
@@ -78,71 +120,71 @@ export function addResizeHandles(wrapper, overlayInfo, container) {
 
     wrapper.appendChild(handle);
 
-    function startResize(e) {
-      e.preventDefault();
-      e.stopPropagation();
+    let startX, startY, startW, startH, startL, startT;
 
-      const isTouch = e.type.startsWith('touch');
-      const startX = isTouch ? e.touches[0].clientX : e.clientX;
-      const startY = isTouch ? e.touches[0].clientY : e.clientY;
-      const startW = parseFloat(wrapper.style.width);
-      const startH = parseFloat(wrapper.style.height);
-      const startL = parseFloat(wrapper.style.left);
-      const startT = parseFloat(wrapper.style.top);
+    const onMove = (clientX, clientY) => {
       const bounds = container.getBoundingClientRect();
+      const dx = (clientX - startX) / bounds.width * 100;
+      const dy = (clientY - startY) / bounds.height * 100;
 
-      function onMove(ev) {
-        const clientX = ev.type.startsWith('touch') ? ev.touches[0].clientX : ev.clientX;
-        const clientY = ev.type.startsWith('touch') ? ev.touches[0].clientY : ev.clientY;
+      let newW = startW, newH = startH, newL = startL, newT = startT;
 
-        const dx = (clientX - startX) / bounds.width * 100;
-        const dy = (clientY - startY) / bounds.height * 100;
-
-        let newW = startW;
-        let newH = startH;
-        let newL = startL;
-        let newT = startT;
-
-        if (pos.includes('r')) newW = Math.max(5, startW + dx);
-        if (pos.includes('l')) {
-          newW = Math.max(5, startW - dx);
-          newL = Math.max(0, startL + dx);
-        }
-        if (pos.includes('b')) newH = Math.max(5, startH + dy);
-        if (pos.includes('t')) {
-          newH = Math.max(5, startH - dy);
-          newT = Math.max(0, startT + dy);
-        }
-
-        newW = Math.min(newW, 100 - newL);
-        newH = Math.min(newH, 100 - newT);
-
-        Object.assign(wrapper.style, {
-          width: `${newW}%`,
-          height: `${newH}%`,
-          left: `${newL}%`,
-          top: `${newT}%`
-        });
-
-        Object.assign(overlayInfo, {
-          width: newW, height: newH, left: newL, top: newT
-        });
+      if (pos.includes('r')) newW = Math.max(5, startW + dx);
+      if (pos.includes('l')) {
+        newW = Math.max(5, startW - dx);
+        newL = Math.max(0, startL + dx);
+      }
+      if (pos.includes('b')) newH = Math.max(5, startH + dy);
+      if (pos.includes('t')) {
+        newH = Math.max(5, startH - dy);
+        newT = Math.max(0, startT + dy);
       }
 
-      function endResize() {
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', endResize);
-        document.removeEventListener('touchmove', onMove);
-        document.removeEventListener('touchend', endResize);
-      }
+      newW = Math.min(newW, 100 - newL);
+      newH = Math.min(newH, 100 - newT);
 
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', endResize);
-      document.addEventListener('touchmove', onMove, { passive: false });
-      document.addEventListener('touchend', endResize);
-    }
+      wrapper.style.width = `${newW}%`;
+      wrapper.style.height = `${newH}%`;
+      wrapper.style.left = `${newL}%`;
+      wrapper.style.top = `${newT}%`;
 
-    handle.addEventListener('mousedown', startResize);
-    handle.addEventListener('touchstart', startResize, { passive: false });
+      overlayInfo.width = newW;
+      overlayInfo.height = newH;
+      overlayInfo.left = newL;
+      overlayInfo.top = newT;
+    };
+
+    const onMouseMove = e => onMove(e.clientX, e.clientY);
+    const onTouchMove = e => {
+      if (e.touches.length > 0) onMove(e.touches[0].clientX, e.touches[0].clientY);
+    };
+
+    const stop = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', stop);
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', stop);
+    };
+
+    const start = e => {
+      e.stopPropagation();
+      e.preventDefault();
+
+      const pointer = e.touches?.[0] || e;
+      startX = pointer.clientX;
+      startY = pointer.clientY;
+      startW = parseFloat(wrapper.style.width);
+      startH = parseFloat(wrapper.style.height);
+      startL = parseFloat(wrapper.style.left);
+      startT = parseFloat(wrapper.style.top);
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', stop);
+      document.addEventListener('touchmove', onTouchMove);
+      document.addEventListener('touchend', stop);
+    };
+
+    handle.addEventListener('mousedown', start);
+    handle.addEventListener('touchstart', start, { passive: false });
   });
 }

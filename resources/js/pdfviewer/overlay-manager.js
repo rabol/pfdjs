@@ -38,15 +38,32 @@ export function insertOverlay(overlayInfo) {
   deleteButton.innerText = '✖';
   Object.assign(deleteButton.style, {
     position: 'absolute',
-    top: '0',
-    right: '0',
+    top: '2px',
+    right: '2px',
     background: 'red',
     color: 'white',
     border: 'none',
-    padding: '2px 5px',
+    width: '20px',
+    height: '20px',
+    lineHeight: '18px',
+    padding: '0',
     cursor: 'pointer',
-    zIndex: '1001',
-    fontSize: '14px'
+    zIndex: '1003',
+    fontSize: '14px',
+    pointerEvents: 'auto',
+    borderRadius: '2px'
+  });
+
+  // 👇 prevent drag-start
+  deleteButton.addEventListener('mousedown', e => {
+    e.stopPropagation();
+  });
+
+  deleteButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const index = overlaysData.indexOf(overlayInfo);
+    if (index !== -1) overlaysData.splice(index, 1);
+    wrapper.remove();
   });
 
   deleteButton.addEventListener('click', (event) => {
