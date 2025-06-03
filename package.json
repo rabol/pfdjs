@@ -15,6 +15,7 @@
         "vite-plugin-static-copy": "^2.3.1"
     },
     "dependencies": {
-        "pdfjs-dist": "^5.1.91"
+        "pdfjs-dist": "^5.1.91",
+        "signature_pad": "^5.0.7"
     }
 }

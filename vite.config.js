@@ -32,6 +32,10 @@ export default defineConfig({
                     src: "resources/js/simpleviewer.mjs",
                     dest: "../js/pdfjs",
                 },
+                {
+                    src: "./node_modules/signature_pad/dist",
+                    dest: "../js/signature_pad",
+                },
             ],
         }),
     ],
