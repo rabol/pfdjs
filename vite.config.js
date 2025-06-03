@@ -24,7 +24,7 @@ export default defineConfig({
                 },
                 {
                     src: "./node_modules/signature_pad/dist",
-                    dest: "js/signature_pad",
+                    dest: "../js/signature_pad",
                 }
             ]
         })
