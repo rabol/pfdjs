@@ -11,6 +11,57 @@
         "Noto Color Emoji";
 }
 
-.pdf-viewer {
-    height: 100vh;
+/* --------- Correct PDF Styling --------- */
+
+#viewerContainer {
+    border: 2px dashed red;
+    padding: 0;
+    margin: 0;
+    overflow: auto;
+}
+
+#pdfPages {
+    padding: 0;
+    margin: 0;
+}
+
+/* Each page wrapper */
+.page-wrapper {
+    background: white;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* Canvas inside each page */
+.page-wrapper canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-sizing: border-box;
+}
+
+/* Overlay image */
+.overlay-layer img {
+    border: 1px dashed #ccc;
+    background: rgba(255, 255, 255, 0.8);
+    pointer-events: none;
+}
+
+/* Make overlay-wrapper fill correctly */
+.overlay-wrapper {
+    box-sizing: border-box;
+}
+
+/* Optional: handles if you want them prettier */
+.resize-handle {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #333;
+    border-radius: 9999px;
+    box-shadow: 0 0 2px rgba(0,0,0,0.5);
 }

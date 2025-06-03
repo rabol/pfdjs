@@ -8,16 +8,18 @@ Route::get('/', function () {
     return view('esign');
 });
 
-Route::get('/pdfviewer', function () {
-    return view('pdfviewer');
-});
-
-Route::get('/pdf/viewer', function () {
-    return view('pdf-viewer.index', [
+Route::get('/pdf-viewer', function () {
+    return view('pdf-viewer', [
         'pdf' => request('pdf'),
     ]);
-})->name('pdf.viewer');
+})->name('pdf-viewer');
 
-Route::get('/pdf', function () {
-    return view('pdf');
-})->name('pdf');
+Route::get('/page-viewer', function () {
+    return view('page-viewer', [
+        'pdf' => request('pdf'),
+    ]);
+})->name('page-viewer');
+
+Route::get('/test', function () {
+    return view('test');
+});
