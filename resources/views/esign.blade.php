@@ -18,29 +18,34 @@
                     <div id="e-sign-placeholder" class="flex min-h-[85vh] items-center justify-center rounded bg-white shadow">
                         <div class="h-10 w-10 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
                     </div>
-                    <div id="e-sign-content" class="hidden h-[50%]">
+                    <div id="e-sign-content" class="hidden h-full">
+                        @livewire('e-sign-parent')
+                    </div>
+                    <!-- <div id="e-sign-content" class="hidden h-[50%]">
                         @livewire('e-sign')
                     </div>
 
                     <div id="e-sign-content2" class="hidden h-[50%]">
                         @livewire('e-sign')
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
 
         @livewireScripts
+
+        @stack('scripts')
         
         <script>
             window.onload = function() {
                 // Show the PDF editor content and hide the placeholder
                 document.getElementById('e-sign-placeholder').classList.add('hidden');
                 document.getElementById('e-sign-content').classList.remove('hidden');
-                document.getElementById('e-sign-content2').classList.remove('hidden');
+                // document.getElementById('e-sign-content2').classList.remove('hidden');
 
                 // Force reload the component
                 Livewire.dispatch('$refresh');
-                console.log('Manually triggering e-sign load');
+                // console.log('Manually triggering e-sign load');
             
             };
             
@@ -52,8 +57,8 @@
             
             // Log when the page is fully loaded
             window.addEventListener('load', function() {
-                console.log('Page fully loaded');
-                console.log('e-sign container:', document.getElementById('e-sign-container'));
+                // console.log('Page fully loaded here');
+                // console.log('e-sign container:', document.getElementById('e-sign-container'));
             });
         </script>
     </body>
